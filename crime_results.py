@@ -25,7 +25,7 @@ def scraper(data):
                       "agency": agency, "date_reported": date_reported}
             data.append(record)
     except:
-        print "Invalid URL"
+        print("Invalid URL")
 
 def export_to_csv(data, ofile):
     f = open(ofile, 'wt')
@@ -40,7 +40,7 @@ def export_to_csv(data, ofile):
         f.close()
 
 def get_url():
-    return 'http://www.crimemapping.com/DetailedReport.aspx?db=1/01/2012+00:00:00&de=3/09/2012+23:59:00&ccs=AR,AS,BU,DP,DR,DU,FR,HO,VT,RO,SX,TH,VA,VB,WE&xmin=-8498704.744278405&ymin=4397645.076574663&xmax=-8477053.956016656&ymax=4404581.736891533'
+    return 'http://www.crimemapping.com/DetailedReport.aspx?db=1/01/2013+00:00:00&de=5/29/2013+23:59:00&ccs=AR,AS,BU,DP,DR,DU,FR,HO,VT,RO,SX,TH,VA,VB,WE&xmin=-8498704.744278405&ymin=4397645.076574663&xmax=-8477053.956016656&ymax=4404581.736891533'
 
 def main():
     ofile = sys.argv[1]
@@ -49,7 +49,7 @@ def main():
     export_to_csv(data, ofile)
 
     if len(data) > 0:
-        print "There are %d crimes listed." % len(data)
+        print("There are %d crimes listed." % len(data))
 
 if __name__ == '__main__':
     main()
