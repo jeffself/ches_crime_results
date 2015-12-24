@@ -2,9 +2,10 @@
 """Scraper for City of Chesapeake's CrimeMapping app"""
 
 import sys
-import urllib
+import requests
 from bs4 import BeautifulSoup
 import csv
+from datetime import date, timedelta
 
 
 def scraper(data):
@@ -13,8 +14,8 @@ def scraper(data):
 
     url = get_url()
     try:
-        html = urllib.urlopen(url).read()
-        soup = BeautifulSoup(html)
+        html = requests.get(url)
+        soup = BeautifulSoup(html.text, "html.parser")
 
         t = soup.findAll('table')[0]
         rows = t.findAll('tr')[2:]
@@ -33,13 +34,12 @@ def scraper(data):
         print("Invalid URL")
 
 
-def export_to_csv(data, ofile):
-    f = open(ofile, 'wt')
+def export_to_csv(data, csvfile):
+    f = open("data/" + csvfile, 'wt')
     try:
         fieldnames = ('crime_type', 'description', 'case_number', 'location',
                       'agency', 'date_reported')
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='|')
-        headers = {}
         for r in data:
             writer.writerow({'crime_type': r['crime_type'],
                              'description': r['description'],
@@ -52,14 +52,31 @@ def export_to_csv(data, ofile):
 
 
 def get_url():
-    return 'http://www.crimemapping.com/DetailedReport.aspx?db=1/1/2014+00:00:00&de=3/26/2014+23:59:00&ccs=AR,AS,BU,DP,DR,DU,FR,HO,VT,RO,SX,TH,VA,VB,WE&xmin=-8511173.534517406&ymin=4390240.239459546&xmax=-8463667.921438234&ymax=4413247.784973353'
+    root_url = 'http://www.crimemapping.com/DetailedReport.aspx'
+    today = date.today()
+    start_date = today - timedelta(180)
+    start_date_string = str(start_date.month) + '/' + str(start_date.day) + \
+        '/' + str(start_date.year) + '+00:00:00'
+    current_date_string = str(today.month) + '/' + str(today.day) + '/' + \
+        str(today.year) + '+23:59:00'
+    ccs = 'AR,AS,BU,DP,DR,DU,FR,HO,VT,RO,SX,TH,VA,VB,WE'
+    xmin = '-8514173.687877595'
+    ymin = '4386877.010215002'
+    xmax = '-8461585.012417465'
+    ymax = '4420356.428603864'
+    faid = '0b80bce5-5d21-468b-ae81-3d6e2ecf532e'
+    url = str(root_url + '?db=' + start_date_string +
+              '&de=' + current_date_string + '&ccs=' + ccs + '&xmin=' +
+              xmin + '&ymin=' + ymin + '&xmax=' + xmax + '&ymax=' + ymax +
+              '&faid=' + faid)
+    return url
 
 
 def main():
-    ofile = sys.argv[1]
+    csvfile = sys.argv[1]
     data = []
     scraper(data)
-    export_to_csv(data, ofile)
+    export_to_csv(data, csvfile)
 
     if len(data) > 0:
         print("There are %d crimes listed." % len(data))
